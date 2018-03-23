@@ -8,7 +8,7 @@ Speed up your Lumen with Swoole
 | -------- | -------- |
 | [PHP](https://secure.php.net/manual/en/install.php) | `>= 7.1.3` |
 | [Swoole](https://www.swoole.co.uk/) | `>= 2.0.3` |
-| [Lumen](https://lumen.laravel.com/) | `>= 5.6` |
+| [Lumen](https://lumen.laravel.com/) | `>= 5.6.2` |
 
 ## Install
 
