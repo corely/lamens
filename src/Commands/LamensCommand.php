@@ -19,7 +19,7 @@ class LamensCommand extends Command {
      *
      * @var string
      */
-    protected $signature = 'lamens {action : start | stop | reload | reload_task | restart | quit | status}';
+    protected $signature = 'lamens {action : start | stop | restart | status | reload | reload_task}';
 
     /**
      * The console command description.
@@ -71,11 +71,9 @@ class LamensCommand extends Command {
             case 'status':
                 $this->status();
                 break;
-            case 'quit':
             case 'reload':
             case 'reload_task':
                 $map = [
-                    'quit' => SIGQUIT,
                     'reload' => SIGUSR1,
                     'reload_task' => SIGUSR2,
                 ];
