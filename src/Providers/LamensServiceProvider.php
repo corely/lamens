@@ -9,6 +9,7 @@
 namespace Lamens\Providers;
 
 use Lamens\Commands\LamensCommand;
+use Lamens\Commands\VendorPublishCommand;
 use Illuminate\Support\ServiceProvider;
 
 class LamensServiceProvider extends ServiceProvider
@@ -38,7 +39,7 @@ class LamensServiceProvider extends ServiceProvider
             __DIR__ . '/../../config/lamens.php', 'lamens'
         );
 
-        $this->commands(LamensCommand::class);
+        $this->commands([LamensCommand::class, VendorPublishCommand::class]);
     }
 
 }

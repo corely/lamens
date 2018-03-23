@@ -85,11 +85,21 @@ class Base extends Swoole {
     }
 
     /**
+     * Load configuration
+     */
+    protected function loadConfig($rootPath) {
+        if (file_exists($rootPath . '/config/lamens.php')) {
+            $this->app->configure('lamens');
+        }
+    }
+
+    /**
      * Initialize Lumen environment.
      */
     protected function prepare() {
         $this->autoload($this->conf['root_path']);
         $this->app = $this->createApp($this->conf['root_path']);
+        $this->loadConfig($this->conf['root_path']);
         $this->app->instance('server', $this->server);
     }
 }
