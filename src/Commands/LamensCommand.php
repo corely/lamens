@@ -19,7 +19,7 @@ class LamensCommand extends Command {
      *
      * @var string
      */
-    protected $signature = 'lamens {action : start | stop | reload | reload_task | restart | quit}';
+    protected $signature = 'lamens {action : start | stop | reload | reload_task | restart | quit | status}';
 
     /**
      * The console command description.
@@ -67,6 +67,9 @@ class LamensCommand extends Command {
                 break;
             case 'stop':
                 $this->stop();
+                break;
+            case 'status':
+                $this->status();
                 break;
             case 'quit':
             case 'reload':
@@ -116,7 +119,7 @@ class LamensCommand extends Command {
     }
 
     /**
-     * Stop lamens process.
+     * Stop lamens server.
      *
      * @throws Exception
      */
@@ -149,7 +152,18 @@ class LamensCommand extends Command {
     }
 
     /**
-     * Start lamens process.
+     * Get status of lamens server.
+     */
+    protected function status() {
+        if ($this->getPid()) {
+            $this->info("lamens is running.");
+        } else {
+            $this->info("lamens has been stopped.");
+        }
+    }
+
+    /**
+     * Start lamens server.
      *
      * @throws Exception
      */
@@ -278,7 +292,7 @@ class LamensCommand extends Command {
     }
 
     /**
-     * Get the process id of the current running lamens process.
+     * Get the process id of the current running lamens server.
      *
      * @return bool|int
      */
