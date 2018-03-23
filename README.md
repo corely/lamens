@@ -40,5 +40,5 @@ php artisan vendor:publish --provider="Lamens\Providers\LamensServiceProvider"
 ## Usage
 
 ```shell
-php artisan lamens [start | stop | reload | reload_task | restart | quit]
+php artisan lamens [start | stop | restart | status | reload | reload_task]
 ```
