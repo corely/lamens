@@ -40,7 +40,7 @@ or just run shell command:
 composer require corely/lamens
 ```
 
-- register Lumen service provider, add the code to your `bootstrap/app.php`:
+- Register Lumen service provider, add the code to your `bootstrap/app.php`:
 
 ```
 $app->register(\Lamens\Providers\LamensServiceProvider::class);
