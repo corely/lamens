@@ -9,6 +9,7 @@
 namespace Lamens\Http;
 
 use Illuminate\Http\Request as IlluminateRequest;
+use Symfony\Component\HttpFoundation\ParameterBag;
 
 class Request {
     /**
@@ -29,8 +30,8 @@ class Request {
      * Initialize the global variable _SERVER.
      */
     private function initGlobalServer() {
-        $server = isset($request->server) ? $this->request->server : [];
-        $header = isset($request->header) ? $this->request->header : [];
+        $server = isset($this->request->server) ? $this->request->server : [];
+        $header = isset($this->request->header) ? $this->request->header : [];
 
         foreach ($header as $key => $value) {
             $key = str_replace('-', '_', $key);
@@ -70,10 +71,10 @@ class Request {
      * Initialize the global variables.
      */
     private function initGlobals() {
-        $_GET = isset($request->get) ? $this->request->get : [];
-        $_POST = isset($request->post) ? $this->request->post : [];
-        $_COOKIE = isset($request->cookie) ? $this->request->cookie : [];
-        $_FILES = isset($request->files) ? $this->request->files : [];
+        $_GET = isset($this->request->get) ? $this->request->get : [];
+        $_POST = isset($this->request->post) ? $this->request->post : [];
+        $_COOKIE = isset($this->request->cookie) ? $this->request->cookie : [];
+        $_FILES = isset($this->request->files) ? $this->request->files : [];
 
         $this->initGlobalServer();
         $this->initGlobalRequest();

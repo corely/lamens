@@ -27,19 +27,33 @@ class Base extends Swoole {
     }
 
     /**
-     * The callback function of Swoole for worker start event.
-     *
-     * @param \swoole_server $server
-     * @param int $workerId
+     * {@inheritdoc}
      */
     public function onWorkerStart($server, $workerId) {
         parent::onWorkerStart($server, $workerId);
-
-        foreach (spl_autoload_functions() as $function) {
-            spl_autoload_unregister($function);
-        }
-
         $this->prepare();
+        event('lamens.work_start', func_get_args());
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function onTask($server, $taskId, $srcWorkerId, $data) {
+        event('lamens.task', func_get_args());
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function onFinish($server, $taskId, $data) {
+        event('lamens.finish', func_get_args());
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function onPipeMessage($server, $srcWorkerId, $data) {
+        event('lamens.pipe_message', func_get_args());
     }
 
     /**
@@ -47,6 +61,17 @@ class Base extends Swoole {
      */
     protected function bindEvent() {
         $this->bindBaseEvent();
+    }
+
+    /**
+     * Fire events before swoole start.
+     */
+    protected function fireServerStarting() {
+        if (isset($this->conf['callbacks']['server_starting'])) {
+            foreach ($this->conf['callbacks']['server_starting'] as $callback) {
+                $callback();
+            }
+        }
     }
 
     /**
@@ -58,48 +83,19 @@ class Base extends Swoole {
         if (isset($this->conf['swoole']['task_worker_num'])) {
             $this->bindTaskEvent();
         }
+        $this->fireServerStarting();
         $this->server->start();
-    }
-
-    /**
-     * Load the autoload file.
-     *
-     * @param $rootPath
-     */
-    protected function autoload($rootPath) {
-        if (file_exists($file = $rootPath . '/vendor/autoload.php')) {
-            require_once $file;
-        } else {
-            require_once $rootPath . '/bootstrap/autoload.php';
-        }
-    }
-
-    /**
-     * Create the Lumen application.
-     *
-     * @param $rootPath
-     * @return \Laravel\Lumen\Application
-     */
-    protected function createApp($rootPath) {
-        return require $rootPath . '/bootstrap/app.php';
-    }
-
-    /**
-     * Load configuration
-     */
-    protected function loadConfig($rootPath) {
-        if (file_exists($rootPath . '/config/lamens.php')) {
-            $this->app->configure('lamens');
-        }
     }
 
     /**
      * Initialize Lumen environment.
      */
     protected function prepare() {
-        $this->autoload($this->conf['root_path']);
-        $this->app = $this->createApp($this->conf['root_path']);
-        $this->loadConfig($this->conf['root_path']);
+        // Create the Lumen application
+        $this->app = require $this->conf['root_path'] . '/bootstrap/app.php';
+        // Load configuration
+        $this->app->configure('lamens');
+        // Bind swoole instance
         $this->app->instance('server', $this->server);
     }
 }

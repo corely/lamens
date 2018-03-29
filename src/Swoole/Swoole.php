@@ -27,11 +27,11 @@ class Swoole {
      *
      * @return array
      */
-    public static function getParams() {
+    public static function getOptions() {
         return [
             'reactor_num',
             'worker_num',
-            'max_request' => 2000,
+            'max_request',
             'max_conn',
             'task_worker_num',
             'task_ipc_mode',
@@ -40,9 +40,9 @@ class Swoole {
             'dispatch_mode',
             'dispatch_func',
             'message_queue_key',
-            'daemonize' => 1,
+            'daemonize',
             'backlog',
-            'log_file' => [self::class, 'getLogFile'],
+            'log_file',
             'log_level',
             'heartbeat_check_interval',
             'heartbeat_idle_time',
@@ -78,6 +78,7 @@ class Swoole {
             'reload_async',
             'tcp_fastopen',
             'max_wait_time',
+            'document_root',
         ];
     }
 
@@ -125,6 +126,7 @@ class Swoole {
     public function onStart($server) {
         $name = sprintf('%s: master process', $this->conf['server']);
         $this->setProcessName($name);
+        echo sprintf("[%s #%d.0]	NOTICE	Server is start now.\n", date("Y-m-d H:i:s"), $server->master_pid);
     }
 
     /**
@@ -144,6 +146,7 @@ class Swoole {
     public function onManagerStart($server) {
         $name = sprintf('%s: manager process', $this->conf['server']);
         $this->setProcessName($name);
+        echo sprintf("[%s $%d.0]	NOTICE	Manager server is start now.\n", date("Y-m-d H:i:s"), $server->manager_pid);
     }
 
     /**
@@ -165,6 +168,9 @@ class Swoole {
         $process = $workerId >= $server->setting['worker_num'] ? 'task' : 'worker';
         $name = sprintf('%s: %s process %d', $this->conf['server'], $process, $workerId);
         $this->setProcessName($name);
+        $flag = $workerId >= $server->setting['worker_num'] ? '^' : '*';
+        echo sprintf("[%s %s%d.%d]	NOTICE	%s server is start now.\n",
+            date("Y-m-d H:i:s"), $flag, $server->worker_pid, $workerId, ucfirst($process));
 
         if (function_exists('opcache_reset')) {
             opcache_reset();

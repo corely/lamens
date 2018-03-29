@@ -161,6 +161,23 @@ class LamensCommand extends Command {
     }
 
     /**
+     * Check server is startup or not.
+     *
+     * @throws Exception
+     */
+    protected function isStartup() {
+        $pidFile = config('lamens.swoole.pid_file');
+        $time = 0;
+        while (!file_exists($pidFile) && $time <= 20) {
+            usleep(100000);
+            $time++;
+        }
+        if (!file_exists($pidFile)) {
+            throw new Exception('Failed! Server process startup failure.');
+        }
+    }
+
+    /**
      * Start lamens server.
      *
      * @throws Exception
@@ -173,6 +190,7 @@ class LamensCommand extends Command {
         }
 
         $this->bootstrap();
+        $this->isStartup();
         $this->info("lamens start successfully.");
     }
 
@@ -200,6 +218,7 @@ class LamensCommand extends Command {
      * @throws Exception
      */
     protected function bootstrap() {
+        app()->configure('lamens');
         $host = config('lamens.host');
         $port = config('lamens.port');
         $socket = @stream_socket_server("tcp://{$host}:{$port}");
@@ -208,9 +227,11 @@ class LamensCommand extends Command {
         } else {
             fclose($socket);
         }
+        $wrapper = $this->getWrapper();
+        $this->checkSwooleOptions($wrapper, config('lamens.swoole'));
 
         $conf = array_merge(config('lamens'), [
-            'wrapper' => $this->getWrapper(),
+            'wrapper' => $wrapper,
             'root_path' => base_path(),
         ]);
 
@@ -224,6 +245,7 @@ class LamensCommand extends Command {
      * Get the wrapper of server.
      *
      * @return string
+     *
      * @throws Exception
      */
     public function getWrapper() {
@@ -240,53 +262,20 @@ class LamensCommand extends Command {
     }
 
     /**
-     * Get the path of the wrapper.
+     * Check swoole options.
      *
      * @param string $wrapper
-     * @return string
+     * @param array $conf
+     *
      * @throws Exception
      */
-    public function getWrapperFile($wrapper) {
-        try {
-            $ref = new ReflectionClass($wrapper);
-        } catch (Exception $e) {
-            throw new Exception("Failed! Class '$wrapper' is not found.");
-        }
-        if (!$ref->implementsInterface(ServerInterface::class)) {
-            throw new Exception("Failed! $wrapper must be instance of Lamens\\Wrapper\\ServerInterface.");
-        }
-        $wrapperFile = $ref->getFileName();
-        return $wrapperFile;
-    }
-
-    /**
-     * Get handler(swoole) configure.
-     *
-     * @param string $wrapper
-     * @return array
-     */
-    protected function getHandlerConfig($wrapper) {
-        $handlerConfig = [];
-        $params = $wrapper::getParams();
-        foreach ($params as $paramName => $default) {
-            if (is_int($paramName)) {
-                $paramName = $default;
-                $default = null;
-            }
-
-            $key = $paramName;
-            $value = config("lamens.swoole.{$key}", function () use ($key, $default) {
-                return env("LAMENS_" . strtoupper($key), $default);
-            });
-
-            if ($value !== null) {
-                if ((is_array($value) || is_object($value)) && is_callable($value)) {
-                    $value = $value();
-                }
-                $handlerConfig[$paramName] = $value;
+    protected function checkSwooleOptions($wrapper, $conf) {
+        $options = $wrapper::getOptions();
+        foreach ($conf as $k => $v) {
+            if (!in_array($k, $options)) {
+                throw new Exception("Failed! swoole option '$k' is not valid.");
             }
         }
-        return $handlerConfig;
     }
 
     /**

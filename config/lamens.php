@@ -14,6 +14,14 @@ return [
     // server name
     'server' => env('LAMENS_SERVER', 'Lamens'),
 
+    // callback function
+    'callbacks' => [
+        // before swoole start
+        'server_starting' => [
+            //['static_class_name', 'static_func_name'],
+        ],
+    ],
+
     // Swoole settings
     'swoole' => [
         'daemonize' => env('LAMENS_DAEMONIZE', true),

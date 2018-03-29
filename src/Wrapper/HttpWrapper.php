@@ -25,20 +25,7 @@ class HttpWrapper extends Base {
     }
 
     /**
-     * The callback function of Swoole for worker start event.
-     *
-     * @param \swoole_server $server
-     * @param int $workerId
-     */
-    public function onWorkerStart($server, $workerId) {
-        parent::onWorkerStart($server, $workerId);
-    }
-
-    /**
-     * The callback function of Swoole for http request event.
-     *
-     * @param \swoole_http_request $request
-     * @param \swoole_http_response $response
+     * {@inheritdoc}
      */
     public function onRequest($request, $response) {
         $request = (new Request($request))->convert();
@@ -47,7 +34,7 @@ class HttpWrapper extends Base {
     }
 
     /**
-     * Bind the Swoole events.
+     * {@inheritdoc}
      */
     protected function bindEvent() {
         parent::bindEvent();
