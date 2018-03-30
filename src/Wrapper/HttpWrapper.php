@@ -15,6 +15,17 @@ use Illuminate\Support\Facades\Facade;
 class HttpWrapper extends Base {
 
     /**
+     * {@inheritdoc}
+     */
+    public static function getEvents() {
+        return [
+            'task',
+            'finish',
+            'pipeMessage',
+        ];
+    }
+
+    /**
      * HttpWrapper constructor.
      *
      * @param array $conf
@@ -42,11 +53,17 @@ class HttpWrapper extends Base {
     }
 
     /**
+     * Bind http event of Swoole.
+     */
+    protected function bindHttpEvent() {
+        $this->server->on('request', [$this, 'onRequest']);
+    }
+
+    /**
      * Clean the remain of request
      * @param $request
      */
-    public function cleanRequest($request)
-    {
+    public function cleanRequest($request) {
         // Clean Lumen session
         if ($request->hasSession()) {
             $session = $request->getSession();

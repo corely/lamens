@@ -27,7 +27,7 @@ class Swoole {
      *
      * @return array
      */
-    public static function getOptions() {
+    public static function getSettings() {
         return [
             'reactor_num',
             'worker_num',
@@ -83,6 +83,28 @@ class Swoole {
     }
 
     /**
+     * Swoole events.
+     * @see https://wiki.swoole.com/wiki/page/41.html
+     *
+     * @return array
+     */
+    public static function getEvents() {
+        return [
+            'connect',
+            'receive',
+            'request',
+            'packet',
+            'close',
+            'bufferFull',
+            'bufferEmpty',
+            'task',
+            'finish',
+            'pipeMessage',
+            'workerError',
+        ];
+    }
+
+    /**
      * Swoole constructor.
      *
      * @param array $conf
@@ -104,18 +126,33 @@ class Swoole {
     }
 
     /**
-     * Bind http event of Swoole.
+     * Bind the Swoole events.
      */
-    protected function bindHttpEvent() {
-        $this->server->on('request', [$this, 'onRequest']);
+    protected function bindEvent() {
+        $this->bindBaseEvent();
+        $this->bindExtraEvent();
     }
 
     /**
-     * Bind task event of Swoole.
+     * Bind extra event of Swoole.
      */
-    protected function bindTaskEvent() {
-        $this->server->on('task', [$this, 'onTask']);
-        $this->server->on('finish', [$this, 'onFinish']);
+    protected function bindExtraEvent() {
+        $events = $this->conf['swoole']['events'];
+        foreach ($events as $event) {
+            $this->server->on($event, [$this, 'on' . ucfirst($event)]);
+        }
+    }
+
+    /**
+     * Set specified name of Swoole process.
+     *
+     * @param string $name
+     */
+    protected function setProcessName($name) {
+        if (PHP_OS === 'Darwin') {
+            return;
+        }
+        \swoole_set_process_name($name);
     }
 
     /**
@@ -241,14 +278,80 @@ class Swoole {
     }
 
     /**
-     * Set specified name of Swoole process.
+     * The callback function of Swoole for connect event.
      *
-     * @param string $name
+     * @param \swoole_server $server
+     * @param int $fd
+     * @param int $reactorId
      */
-    protected function setProcessName($name) {
-        if (PHP_OS === 'Darwin') {
-            return;
-        }
-        \swoole_set_process_name($name);
+    public function onConnect($server, $fd, $reactorId) {
+
+    }
+
+    /**
+     * The callback function of Swoole for receive event.
+     *
+     * @param \swoole_server $server
+     * @param int $fd
+     * @param int $reactorId
+     * @param string $data
+     */
+    public function onReceive($server, $fd, $reactorId, $data) {
+
+    }
+
+    /**
+     * The callback function of Swoole for packet event.
+     *
+     * @param \swoole_server $server
+     * @param string $data
+     * @param array $clientInfo
+     */
+    public function onPacket($server, $data, $clientInfo) {
+
+    }
+
+    /**
+     * The callback function of Swoole for close event.
+     *
+     * @param \swoole_server $server
+     * @param int $fd
+     * @param int $reactorId
+     */
+    public function onClose($server, $fd, $reactorId) {
+
+    }
+
+    /**
+     * The callback function of Swoole for buffer full event.
+     *
+     * @param \swoole_server $server
+     * @param int $fd
+     */
+    public function onBufferFull($server, $fd) {
+
+    }
+
+    /**
+     * The callback function of Swoole for buffer empty event.
+     *
+     * @param \swoole_server $server
+     * @param int $fd
+     */
+    public function onBufferEmpty($server, $fd) {
+
+    }
+
+    /**
+     * The callback function of Swoole for worker error event.
+     *
+     * @param \swoole_server $server
+     * @param int $workerId
+     * @param int $workerPid
+     * @param int $exitCode
+     * @param int $signal
+     */
+    public function onWorkerError($server, $workerId, $workerPid, $exitCode, $signal) {
+
     }
 }

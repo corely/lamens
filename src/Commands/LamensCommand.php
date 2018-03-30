@@ -131,8 +131,8 @@ class LamensCommand extends Command {
         if ($cnt >= 10) {
             throw new Exception("Failed! Stopping lamens process timeout.");
         }
-        if (file_exists(config('lamens.swoole.pid_file'))) {
-            unlink(config('lamens.swoole.pid_file'));
+        if (file_exists($this->getPidFile())) {
+            unlink($this->getPidFile());
         }
         $this->info("lamens stop successfully.");
     }
@@ -166,7 +166,7 @@ class LamensCommand extends Command {
      * @throws Exception
      */
     protected function isStartup() {
-        $pidFile = config('lamens.swoole.pid_file');
+        $pidFile = $this->getPidFile();
         $time = 0;
         while (!file_exists($pidFile) && $time <= 20) {
             usleep(100000);
@@ -228,7 +228,8 @@ class LamensCommand extends Command {
             fclose($socket);
         }
         $wrapper = $this->getWrapper();
-        $this->checkSwooleOptions($wrapper, config('lamens.swoole'));
+        $this->checkSwooleConfig(array_keys(config('lamens.swoole.settings')), $wrapper::getSettings());
+        $this->checkSwooleConfig(config('lamens.swoole.events'), $wrapper::getEvents());
 
         $conf = array_merge(config('lamens'), [
             'wrapper' => $wrapper,
@@ -262,20 +263,28 @@ class LamensCommand extends Command {
     }
 
     /**
-     * Check swoole options.
+     * Check swoole configuration.
      *
-     * @param string $wrapper
-     * @param array $conf
+     * @param $config
+     * @param $options
      *
      * @throws Exception
      */
-    protected function checkSwooleOptions($wrapper, $conf) {
-        $options = $wrapper::getOptions();
-        foreach ($conf as $k => $v) {
-            if (!in_array($k, $options)) {
-                throw new Exception("Failed! swoole option '$k' is not valid.");
+    protected function checkSwooleConfig($config, $options) {
+        foreach ($config as $v) {
+            if (!in_array($v, $options)) {
+                throw new Exception("Failed! swoole config '$v' is not valid.");
             }
         }
+    }
+
+    /**
+     * Get pid file path.
+     *
+     * @return string
+     */
+    protected function getPidFile() {
+        return config('lamens.swoole.settings.pid_file');
     }
 
     /**
@@ -284,7 +293,7 @@ class LamensCommand extends Command {
      * @return bool|int
      */
     protected function getPid() {
-        $pidFile = config('lamens.swoole.pid_file');
+        $pidFile = $this->getPidFile();
         try {
             if (file_exists($pidFile)) {
                 $pid = file_get_contents($pidFile);
