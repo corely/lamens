@@ -39,7 +39,7 @@ class LamensServiceProvider extends ServiceProvider
             __DIR__ . '/../../config/lamens.php', 'lamens'
         );
 
-        $this->commands([LamensCommand::class, VendorPublishCommand::class]);
+        $this->commands([LamensCommand::class]);
     }
 
 }
