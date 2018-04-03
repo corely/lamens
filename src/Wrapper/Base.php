@@ -65,8 +65,20 @@ class Base extends Swoole {
     protected function fireServerStarting() {
         if (isset($this->conf['callbacks']['server_starting'])) {
             foreach ($this->conf['callbacks']['server_starting'] as $callback) {
-                $callback();
+                $callback($this->server, $this->conf);
             }
+        }
+    }
+
+    protected function bindProcess() {
+        if (isset($this->conf['swoole']['process'])) {
+            $callback = $this->conf['swoole']['process'];
+            $process = new \swoole_process(function ($process) use ($callback) {
+                $this->prepare();
+                $callback($this->server, $process);
+            });
+
+            $this->server->addProcess($process);
         }
     }
 
@@ -77,6 +89,7 @@ class Base extends Swoole {
         $this->server->set($this->conf['swoole']['settings']);
         $this->bindEvent();
         $this->fireServerStarting();
+        $this->bindProcess();
         $this->server->start();
     }
 

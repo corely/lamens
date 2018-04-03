@@ -52,5 +52,11 @@ return [
             //'finish',
             //'pipeMessage',
         ],
+
+        /**
+         * Customize process add to Swoole server
+         * @see https://wiki.swoole.com/wiki/page/390.html
+         */
+        //'process' => ['static_class_name', 'static_func_name'],
     ]
 ];
